@@ -120,7 +120,7 @@ pipeline {
               docker.withRegistry('https://index.docker.io/v1/', 'dockerlogin') {
                   def workerImage = docker.build("yogatom0218/worker:v${env.BUILD_ID}", "./worker")
                   workerImage.push()
-                  workerImage.push("${env.BRANCH_NAME}")
+                  // workerImage.push("${env.BRANCH_NAME}")
                   workerImage.push("latest")
               }
             }
@@ -129,14 +129,18 @@ pipeline {
 
       stage('docker-package-vote'){
           agent any
+          // when{
+          //   changeset "**/vote/**"
+          //   branch 'master'
+          // }          
           steps{
-            echo 'Packaging worker app with docker'
+            echo 'Packaging vote app with docker'
             script{
               docker.withRegistry('https://index.docker.io/v1/', 'dockerlogin') {
-                  def workerImage = docker.build("yogatom0218/worker:v${env.BUILD_ID}", "./vote")
-                  workerImage.push()
-                  workerImage.push("${env.BRANCH_NAME}")
-                  workerImage.push("latest")
+                  def voteImage = docker.build("yogatom0218/vote:v${env.BUILD_ID}", "./vote")
+                  voteImage.push()
+                  // voteImage.push("${env.BRANCH_NAME}")
+                  voteImage.push("latest")
               }
             }
           }
@@ -145,17 +149,17 @@ pipeline {
       stage('docker-package-result'){
           agent any
           // when{
-          //   changeset "**/worker/**"
+          //   changeset "**/result/**"
           //   branch 'master'
           // }
           steps{
-            echo 'Packaging worker app with docker'
+            echo 'Packaging result app with docker'
             script{
               docker.withRegistry('https://index.docker.io/v1/', 'dockerlogin') {
-                  def workerImage = docker.build("yogatom0218/worker:v${env.BUILD_ID}", "./result")
-                  workerImage.push()
-                  workerImage.push("${env.BRANCH_NAME}")
-                  workerImage.push("latest")
+                  def resultImage = docker.build("yogatom0218/result:v${env.BUILD_ID}", "./result")
+                  resultImage.push()
+                  // resultImage.push("${env.BRANCH_NAME}")
+                  resultImage.push("latest")
               }
             }
           }
