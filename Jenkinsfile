@@ -110,10 +110,10 @@ pipeline {
       // ===================== 统一打包推送 =====================
       stage('docker-package-worker'){
           agent any
-          // when{
-          //   changeset "**/worker/**"
-          //   branch 'master'
-          // }
+          when{
+            changeset "**/worker/**"
+            branch 'master'
+          }
           steps{
             echo 'Packaging worker app with docker'
             script{
@@ -129,10 +129,10 @@ pipeline {
 
       stage('docker-package-vote'){
           agent any
-          // when{
-          //   changeset "**/vote/**"
-          //   branch 'master'
-          // }          
+          when{
+            changeset "**/vote/**"
+            branch 'master'
+          }          
           steps{
             echo 'Packaging vote app with docker'
             script{
@@ -148,10 +148,10 @@ pipeline {
 
       stage('docker-package-result'){
           agent any
-          // when{
-          //   changeset "**/result/**"
-          //   branch 'master'
-          // }
+          when{
+            changeset "**/result/**"
+            branch 'master'
+          }
           steps{
             echo 'Packaging result app with docker'
             script{
@@ -164,7 +164,19 @@ pipeline {
             }
           }
       }
-      
+
+      stage('deploy to dev'){
+          agent any
+          when{
+              branch 'master'
+          }
+          steps{
+              echo 'Deploy instavote app with docker compose'
+              sh 'docker-compose down'
+              sh 'sleep 10'
+              sh 'docker-compose up -d'
+          }
+      }      
   }
 
   post{
