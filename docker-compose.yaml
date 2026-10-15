@@ -1,0 +1,66 @@
+volumes:
+  db-data:
+
+networks:
+  instavote:
+    driver: bridge
+
+services:
+  vote:
+    image: yogatom0218/vote:latest
+    build: ./vote
+    ports:
+      - 5000:80
+    depends_on:
+      - redis
+    networks:
+      - instavote
+
+  redis:
+    image: redis:alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - instavote
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+      - "./healthchecks:/healthchecks"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - instavote
+
+  result:
+    image: yogatom0218/result:latest
+    build: ./result
+    ports:
+      - 5001:80
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - instavote
+
+  worker:
+    image: yogatom0218/worker:latest
+    build: ./worker
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    networks:
+      - instavote
